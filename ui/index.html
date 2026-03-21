@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CCTV Weapon Detection System</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-color: #0f172a;
+        --surface-color: #1e293b;
+        --primary-color: #3b82f6;
+        --primary-hover: #2563eb;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --border-color: #334155;
+        --danger-color: #ef4444;
+        --success-color: #10b981;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        line-height: 1.6;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        background-color: var(--surface-color);
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .header-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .header-title span {
+        color: var(--primary-color);
+      }
+
+      .metrics-link {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.2s;
+      }
+
+      .metrics-link:hover {
+        color: var(--text-main);
+      }
+
+      main {
+        flex: 1;
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 2rem;
+      }
+
+      @media (max-width: 900px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .panel {
+        background-color: var(--surface-color);
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        padding: 1.5rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      }
+
+      .main-display {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      /* Upload Area */
+      .upload-area {
+        border: 2px dashed var(--border-color);
+        border-radius: 8px;
+        padding: 3rem 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+        background: rgba(30, 41, 59, 0.5);
+      }
+
+      .upload-area:hover,
+      .upload-area.dragover {
+        border-color: var(--primary-color);
+        background: rgba(59, 130, 246, 0.05);
+      }
+
+      .upload-icon {
+        font-size: 3rem;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+      }
+
+      .upload-text {
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+      }
+
+      .upload-subtext {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+
+      #file-input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      /* Canvas Area */
+      .canvas-container {
+        width: 100%;
+        border-radius: 8px;
+        overflow: hidden;
+        background-color: #000;
+        position: relative;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        min-height: 400px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+
+      .canvas-container.active {
+        display: flex;
+      }
+
+      canvas {
+        max-width: 100%;
+        max-height: 70vh;
+        object-fit: contain;
+      }
+
+      /* Loading Overlay */
+      .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(15, 23, 42, 0.8);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+      }
+
+      .loading-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top-color: var(--primary-color);
+        animation: spin 1s ease-in-out infinite;
+        margin-bottom: 1rem;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Sidebar */
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .status-card {
+        background: rgba(15, 23, 42, 0.5);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .status-label {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.25rem;
+      }
+
+      .status-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .status-value.danger {
+        color: var(--danger-color);
+      }
+      .status-value.success {
+        color: var(--success-color);
+      }
+
+      .btn {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        width: 100%;
+        transition: background-color 0.2s;
+      }
+
+      .btn:hover {
+        background-color: var(--primary-hover);
+      }
+
+      .btn:disabled {
+        background-color: var(--border-color);
+        cursor: not-allowed;
+        color: var(--text-muted);
+      }
+
+      .results-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .detection-item {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        border-radius: 6px;
+        padding: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .detection-name {
+        font-weight: 600;
+        color: var(--danger-color);
+      }
+
+      .detection-conf {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        background: rgba(0, 0, 0, 0.2);
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+      }
+
+      /* Tiny utility for the metrics text below */
+      .meta-stats {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-title">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          style="color: var(--primary-color)"
+        >
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        CCTV Weapon <span>Detection System</span>
+      </div>
+      <a href="/metrics" class="metrics-link" target="_blank"
+        >View Prometheus Metrics ↗</a
+      >
+    </header>
+
+    <main>
+      <div class="panel main-display">
+        <!-- Upload Area -->
+        <div class="upload-area" id="upload-area">
+          <input
+            type="file"
+            id="file-input"
+            accept="image/jpeg, image/png, image/webp"
+          />
+          <div class="upload-icon">📷</div>
+          <div class="upload-text">Click or drag an image here to scan</div>
+          <div class="upload-subtext">Supports JPG, PNG, WEBP</div>
+          <img id="preview-img" style="display: none" />
+        </div>
+
+        <!-- Canvas Result Area -->
+        <div class="canvas-container" id="canvas-container">
+          <canvas id="result-canvas"></canvas>
+          <div class="loading-overlay" id="loading-overlay">
+            <div class="spinner"></div>
+            <div>Analyzing frame...</div>
+          </div>
+        </div>
+
+        <button
+          class="btn"
+          id="reset-btn"
+          style="display: none; width: auto; align-self: center"
+        >
+          Upload New Image
+        </button>
+      </div>
+
+      <div class="sidebar">
+        <div class="panel">
+          <h3 class="section-title">Analysis Status</h3>
+
+          <div class="status-card">
+            <div class="status-label">Threat Assessment</div>
+            <div class="status-value" id="threat-status">Waiting...</div>
+          </div>
+
+          <div class="meta-stats" id="meta-stats" style="display: none">
+            <span id="latency-stat">Latency: -- ms</span>
+          </div>
+        </div>
+
+        <div class="panel" id="detections-panel" style="display: none">
+          <h3 class="section-title">
+            Detections
+            <span
+              id="detection-count"
+              style="
+                float: right;
+                background: var(--danger-color);
+                color: white;
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 0.8rem;
+              "
+              >0</span
+            >
+          </h3>
+          <div class="results-list" id="results-list">
+            <!-- JavaScript will populate this -->
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const uploadArea = document.getElementById("upload-area");
+      const fileInput = document.getElementById("file-input");
+      const canvasContainer = document.getElementById("canvas-container");
+      const resultCanvas = document.getElementById("result-canvas");
+      const ctx = resultCanvas.getContext("2d");
+      const loadingOverlay = document.getElementById("loading-overlay");
+      const resetBtn = document.getElementById("reset-btn");
+
+      const threatStatus = document.getElementById("threat-status");
+      const metaStats = document.getElementById("meta-stats");
+      const latencyStat = document.getElementById("latency-stat");
+      const detectionsPanel = document.getElementById("detections-panel");
+      const resultsList = document.getElementById("results-list");
+      const detectionCount = document.getElementById("detection-count");
+
+      let currentImage = new Image();
+
+      // Handle Drag and Drop visuals
+      ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+        uploadArea.addEventListener(eventName, preventDefaults, false);
+      });
+
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      ["dragenter", "dragover"].forEach((eventName) => {
+        uploadArea.addEventListener(
+          eventName,
+          () => uploadArea.classList.add("dragover"),
+          false,
+        );
+      });
+
+      ["dragleave", "drop"].forEach((eventName) => {
+        uploadArea.addEventListener(
+          eventName,
+          () => uploadArea.classList.remove("dragover"),
+          false,
+        );
+      });
+
+      // Handle file drop
+      uploadArea.addEventListener("drop", (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length > 0) handleFile(files[0]);
+      });
+
+      // Handle file click/browse
+      fileInput.addEventListener("change", function () {
+        if (this.files.length > 0) handleFile(this.files[0]);
+      });
+
+      resetBtn.addEventListener("click", resetUI);
+
+      function handleFile(file) {
+        if (!file.type.startsWith("image/")) {
+          alert("Please upload an image file.");
+          return;
+        }
+
+        // Show canvas container, hide upload area
+        uploadArea.style.display = "none";
+        canvasContainer.classList.add("active");
+        loadingOverlay.classList.add("active");
+        resetBtn.style.display = "none";
+        detectionsPanel.style.display = "none";
+        threatStatus.innerHTML = "Analyzing...";
+        threatStatus.className = "status-value";
+        metaStats.style.display = "none";
+
+        // Draw image to canvas first
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          currentImage.onload = () => {
+            // Set canvas size to match image intrinsic dimensions
+            resultCanvas.width = currentImage.width;
+            resultCanvas.height = currentImage.height;
+            ctx.drawImage(currentImage, 0, 0);
+
+            // Actually perform prediction
+            uploadAndPredict(file);
+          };
+          currentImage.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      async function uploadAndPredict(file) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+          // Fetch from the local FastAPI inference endpoint
+          const response = await fetch("/predict", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!response.ok) {
+            throw new Error(`Server returned ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          loadingOverlay.classList.remove("active");
+          renderResults(data);
+        } catch (error) {
+          console.error("Prediction Error:", error);
+          loadingOverlay.classList.remove("active");
+          threatStatus.innerHTML = "Error";
+          threatStatus.className = "status-value danger";
+          alert("An error occurred during detection: " + error.message);
+          resetBtn.style.display = "block";
+        }
+      }
+
+      function renderResults(data) {
+        resetBtn.style.display = "block";
+        metaStats.style.display = "flex";
+        latencyStat.textContent = `Latency: ${data.inference_time_ms} ms`;
+
+        if (data.num_detections === 0) {
+          threatStatus.innerHTML = "CLEAR ✓";
+          threatStatus.className = "status-value success";
+          detectionsPanel.style.display = "none";
+        } else {
+          threatStatus.innerHTML = "THREAT DETECTED ⚠";
+          threatStatus.className = "status-value danger";
+
+          detectionsPanel.style.display = "block";
+          detectionCount.textContent = data.num_detections;
+          resultsList.innerHTML = "";
+
+          // Draw boxes and populate list
+          data.detections.forEach((det) => {
+            // Draw Box
+            const [x1, y1, x2, y2] = det.bbox;
+            const width = x2 - x1;
+            const height = y2 - y1;
+
+            // Adjust line width based on image size to keep it visible
+            const lineWidth = Math.max(2, Math.floor(currentImage.width / 300));
+
+            ctx.lineWidth = lineWidth;
+            ctx.strokeStyle = "#ef4444"; // Red
+            ctx.strokeRect(x1, y1, width, height);
+
+            // Draw label background
+            const fontSize = Math.max(12, Math.floor(currentImage.width / 50));
+            ctx.font = `bold ${fontSize}px Inter, sans-serif`;
+            const label = `${det.class_name} ${(det.confidence * 100).toFixed(0)}%`;
+            const textWidth = ctx.measureText(label).width;
+
+            ctx.fillStyle = "#ef4444";
+            ctx.fillRect(x1, y1 - fontSize - 6, textWidth + 8, fontSize + 6);
+
+            // Draw text
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText(label, x1 + 4, y1 - 4);
+
+            // Add to sidebar list
+            const div = document.createElement("div");
+            div.className = "detection-item";
+            div.innerHTML = `
+                        <span class="detection-name">${det.class_name.toUpperCase()}</span>
+                        <span class="detection-conf">${(det.confidence * 100).toFixed(1)}%</span>
+                    `;
+            resultsList.appendChild(div);
+          });
+        }
+      }
+
+      function resetUI() {
+        uploadArea.style.display = "block";
+        canvasContainer.classList.remove("active");
+        resetBtn.style.display = "none";
+        detectionsPanel.style.display = "none";
+        threatStatus.innerHTML = "Waiting...";
+        threatStatus.className = "status-value";
+        metaStats.style.display = "none";
+        fileInput.value = ""; // clear input
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "weapon_detection_api"
+    static_configs:
+      # Use host.docker.internal for local testing across OS
+      # In production, this would be the container IP or DNS name
+      - targets: ["api:8000"]

@@ -1,0 +1,12 @@
+venv/
+output/
+__pycache__/
+*.jpg
+*.png
+*.webp
+*.jpeg
+*.ipynb
+*.json
+nb_part*
+prepare_dataset.py
+assemble_notebook.py
