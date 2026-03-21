@@ -7,7 +7,7 @@ What began as an "Intro to Computer Vision" university project benchmarking YOLO
 
 ## 1. The Journey: Course Project to Systems Engineering
 ### 1.1 The Genesis
-The initial scope of this project was an academic benchmark. The goal was to compare the performance of YOLOv11 and RT-DETR for detecting weapons in degraded CCTV footage. We compiled a dataset of over 35,000 images, performed rigorous hard-negative mining, and plotted P-R curves. The YOLO-based architecture ultimately won out due to its superior inference speed on edge hardware without sacrificing mAP on small objects.
+The initial scope of this project was an academic benchmark. The goal was to compare the performance of YOLOv11 and RT-DETR for detecting weapons in degraded CCTV footage. We leveraged the [Hyper.ai Gun Detection Dataset](https://hyper.ai/en/datasets/20876), which provides 51,000 annotated images designed for analyzing real-time weapon detection in surveillance videos. We augmented this foundation with rigorous hard-negative mining and plotted P-R curves. The YOLO-based architecture ultimately won out due to its superior inference speed on edge hardware without sacrificing mAP on small objects.
 
 ### 1.2 The "AI Engineer" Pivot
 Building a Jupyter Notebook that detects weapons in static images is a data science task. Building a system that can ingest 24/7 RTSP streams, recover from network drops, and serve low-latency detections via API is an **AI Engineering** task. 
@@ -55,7 +55,7 @@ These metrics allow for seamless Grafana dashboarding, giving system administrat
 **Content:**
 What started as my "Intro to Computer Vision" coursework just turned into a production-grade Edge AI Security Platform. 
 
-Initially, my goal was simple: benchmark YOLOv11 vs RT-DETR for weapon detection on low-quality CCTV feeds. After fine-tuning on 35K+ images with heavy hard-negative mining, I had a great model. But I quickly realized a hard truth—a highly accurate Jupyter notebook does absolutely nothing in the real world. 
+Initially, my goal was simple: benchmark YOLOv11 vs RT-DETR for weapon detection on low-quality CCTV feeds. After fine-tuning on the [Hyper.ai Gun Detection Dataset](https://hyper.ai/en/datasets/20876) (51,000+ CCTV artifacts) coupled with heavy hard-negative mining, I had a great model. But I quickly realized a hard truth—a highly accurate Jupyter notebook does absolutely nothing in the real world. 
 
 To bridge the gap between Data Science and AI Engineering, I entirely rebuilt the deployment pipeline. Here’s what it took to get this application "edge-ready":
 

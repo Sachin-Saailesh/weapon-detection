@@ -7,7 +7,7 @@ This repository contains a production-grade Edge AI pipeline engineered for iden
 ## 🚀 Key Architectural Features
 
 ### 1. Model Precision & Custom Filtering
-- **Aggressive Hard-Negative Mining:** Trained on 35,000+ CCTV artifacts with thousands of negative samples to practically eliminate false-positive alerts on common objects.
+- **Hyper.ai Gun Detection Dataset:** Trained on the comprehensive [Gun Detection Dataset](https://hyper.ai/en/datasets/20876) consisting of 51,000+ annotated CCTV artifacts, combined with thousands of negative samples via aggressive hard-negative mining to practically eliminate false-positive alerts on common objects.
 - **Geometric Heuristics & NMS:** Raw inference logic is fortified with strict Non-Maximum Suppression (IoU 0.45) and a spatial heuristic filter that automatically rejects bounding boxes occupying >25% of the frame (preventing edge-cases like the model misclassifying a mounted CCTV camera body as a weapon).
 
 ### 2. Edge-Optimized Deployment
